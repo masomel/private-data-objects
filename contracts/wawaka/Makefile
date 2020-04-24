@@ -58,7 +58,7 @@ install : build
 
 build : $(CDI_COMPILER_SIGN_PEM) $(BUILD_AOT)
 	mkdir -p $@
-	cd $@ && emcmake cmake ..
+	cd $@ ; cmake .. -DCMAKE_TOOLCHAIN_FILE=$(WASM_SRC)/wamr-sdk/app/wasi_toolchain.cmake
 
 $(CDI_COMPILER_SIGN_PEM):
 	@echo Generating CDI compiler keys

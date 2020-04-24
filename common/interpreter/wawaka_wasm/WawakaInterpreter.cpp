@@ -95,10 +95,10 @@ void WawakaInterpreter::parse_response_string(
     // address in the native code
     int32 response_app_beg, response_app_end;
 
-    pe::ThrowIf<pe::RuntimeError>(
+    /*pe::ThrowIf<pe::RuntimeError>(
         response_app == 0,
         report_interpreter_error("invalid result pointer", "no response"));
-
+    */
     pe::ThrowIf<pe::RuntimeError>(
         ! wasm_runtime_get_app_addr_range(wasm_module_inst, response_app, &response_app_beg, &response_app_end),
         report_interpreter_error("invalid result pointer", "out of range"));
@@ -177,7 +177,7 @@ int32 WawakaInterpreter::initialize_contract(
     int32 result = 0;
 
     SAFE_LOG(PDO_LOG_DEBUG, "wasm initialize_contract");
-    wasm_func = wasm_runtime_lookup_function(wasm_module_inst, "_ww_initialize", "(i32)i32");
+    wasm_func = wasm_runtime_lookup_function(wasm_module_inst, "ww_initialize", "(i32)i32");
     pe::ThrowIfNull(wasm_func, "Unable to locate the initialize function");
 
     uint32 argv[1], buf_offset = 0;
@@ -224,7 +224,7 @@ int32 WawakaInterpreter::evaluate_function(
     SAFE_LOG(PDO_LOG_DEBUG, "evaluate_function");
     pc::validate_invocation_request(args);
 
-    wasm_func = wasm_runtime_lookup_function(wasm_module_inst, "_ww_dispatch", "(i32i32)i32");
+    wasm_func = wasm_runtime_lookup_function(wasm_module_inst, "ww_dispatch", "(i32i32)i32");
     pe::ThrowIfNull(wasm_func, "Unable to locate the dispatch function");
 
     uint32 argv[2], buf_offset0 = 0, buf_offset1 = 0;

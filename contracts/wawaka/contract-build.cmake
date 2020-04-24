@@ -20,11 +20,9 @@ IF (NOT DEFINED ENV{WASM_MEM_CONFIG})
   MESSAGE(FATAL_ERROR "WASM_MEM_CONFIG environment variable not defined!")
 ENDIF()
 
-SET(PDO_TOP_DIR $ENV{PDO_SOURCE_ROOT})
+SET(PDO_TOP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../")
 
 SET(WASM_MEM_CONFIG "$ENV{WASM_MEM_CONFIG}")
-
-SET(CONTRACT_EXPORTS "\"['_ww_dispatch', '_ww_initialize']\"")
 
 # Set the memory configuration for emscripten
 # LINEAR_MEMORY: Maximum size for a WASM module's linear memory (module's internal stack + static globals + padding); needs to be multiple of 64KB
@@ -43,27 +41,15 @@ ELSE()
   message(STATUS "Building contracts for MEDIUM memory configuration")
 ENDIF ()
 
-SET(EMCC_BUILD_OPTIONS)
-LIST(APPEND EMCC_BUILD_OPTIONS "-s WASM=1")
-LIST(APPEND EMCC_BUILD_OPTIONS "-s BINARYEN_TRAP_MODE=clamp")
-LIST(APPEND EMCC_BUILD_OPTIONS "-s ASSERTIONS=1")
-LIST(APPEND EMCC_BUILD_OPTIONS "-s STACK_OVERFLOW_CHECK=2")
-LIST(APPEND EMCC_BUILD_OPTIONS "-s SIDE_MODULE=1")
-
-SET(EMCC_LINK_OPTIONS "${EMCC_BUILD_OPTIONS}")
-LIST(APPEND EMCC_LINK_OPTIONS "-s TOTAL_MEMORY=${LINEAR_MEMORY}")
-LIST(APPEND EMCC_LINK_OPTIONS "-s TOTAL_STACK=${INTERNAL_STACK_SIZE}")
-LIST(APPEND EMCC_LINK_OPTIONS "-s EXPORTED_FUNCTIONS=${CONTRACT_EXPORTS}")
-
-STRING(REPLACE ";" " " EMCC_BUILD_OPTIONS "${EMCC_BUILD_OPTIONS}")
-STRING(REPLACE ";" " " EMCC_LINK_OPTIONS "${EMCC_LINK_OPTIONS}")
-
 # the -O2 is actually required for the moment because it removes
 # uncalled functions that clutter the wasm file
-SET(CMAKE_CXX_FLAGS "-O2 -fPIC -fno-exceptions ${EMCC_BUILD_OPTIONS}")
+SET(CMAKE_CXX_FLAGS "-O2 -fPIC -fno-exceptions")
 SET(CMAKE_EXECUTABLE_SUFFIX ".wasm")
 
-FILE(GLOB COMMON_SOURCE ${PDO_TOP_DIR}/contracts/wawaka/common/*.cpp)
+SET(CONTRACT_EXPORTS "-Wl,--allow-undefined,--export=ww_dispatch,--export=ww_initialize")
+SET(CMAKE_EXE_LINKER_FLAGS "-z stack-size=24KB -Wl,--initial-memory=64KB,--no-threads,--no-entry ${CONTRACT_EXPORTS}")
+
+FILE(GLOB COMMON_SOURCE common/*.cpp)
 
 SET(LIBRARY_SOURCE ${PDO_TOP_DIR}/common/packages/parson/parson.cpp)
 
@@ -93,7 +79,7 @@ FUNCTION(BUILD_CONTRACT contract)
   SET_SOURCE_FILES_PROPERTIES(${b64contract} PROPERTIES GENERATED TRUE)
   SET_DIRECTORY_PROPERTIES(PROPERTY ADDITIONAL_MAKE_CLEAN_FILES ${b64contract})
   # this can be replaced in later versions of CMAKE with target_link_properties
-  SET_PROPERTY(TARGET ${contract} APPEND_STRING PROPERTY LINK_FLAGS "${EMCC_LINK_OPTIONS}")
+  SET_PROPERTY(TARGET ${contract} APPEND_STRING PROPERTY LINK_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
   INSTALL(FILES ${b64contract} DESTINATION ${CONTRACT_INSTALL_DIRECTORY})
 ENDFUNCTION()
 
