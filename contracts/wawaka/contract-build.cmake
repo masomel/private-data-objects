@@ -27,27 +27,28 @@ SET(WASM_MEM_CONFIG "$ENV{WASM_MEM_CONFIG}")
 # Set the memory configuration for emscripten
 # LINEAR_MEMORY: Maximum size for a WASM module's linear memory (module's internal stack + static globals + padding); needs to be multiple of 64KB
 # INTERNAL_STACK_SIZE: Size of a WASM module's internal data stack (part of LINEAR_MEMORY)
+# sigh: clang/ld only accepts linear memory values as ints
 IF (WASM_MEM_CONFIG STREQUAL "SMALL")
-  SET(INTERNAL_STACK_SIZE 24KB)
-  SET(LINEAR_MEMORY 64KB)
+  SET(INTERNAL_STACK_SIZE 24672) # 24KB
+  SET(LINEAR_MEMORY 65536) # 64KB
   message(STATUS "Building contracts for SMALL memory configuration")
 ELSEIF (WASM_MEM_CONFIG STREQUAL "LARGE")
-  SET(INTERNAL_STACK_SIZE 96KB)
-  SET(LINEAR_MEMORY 256KB)
+  SET(INTERNAL_STACK_SIZE 98304) # 96KB
+  SET(LINEAR_MEMORY 262144) # 256KB
   message(STATUS "Building contracts for LARGE memory configuration")
 ELSE()
-  SET(INTERNAL_STACK_SIZE 48KB)
-  SET(LINEAR_MEMORY 128KB)
+  SET(INTERNAL_STACK_SIZE 49152) # 48KB
+  SET(LINEAR_MEMORY 131072) # 128KB
   message(STATUS "Building contracts for MEDIUM memory configuration")
 ENDIF ()
 
 # the -O2 is actually required for the moment because it removes
 # uncalled functions that clutter the wasm file
-SET(CMAKE_CXX_FLAGS "-O2 -fPIC -fno-exceptions")
+SET(CMAKE_CXX_FLAGS "-O2 -nostdlib -fPIC -fno-exceptions")
 SET(CMAKE_EXECUTABLE_SUFFIX ".wasm")
 
 SET(CONTRACT_EXPORTS "-Wl,--allow-undefined,--export=ww_dispatch,--export=ww_initialize")
-SET(CMAKE_EXE_LINKER_FLAGS "-z stack-size=24KB -Wl,--initial-memory=64KB,--no-threads,--no-entry ${CONTRACT_EXPORTS}")
+SET(CMAKE_EXE_LINKER_FLAGS "-z stack-size=${INTERNAL_STACK_SIZE} -Wl,--initial-memory=${LINEAR_MEMORY},--no-threads,--no-entry ${CONTRACT_EXPORTS}")
 
 FILE(GLOB COMMON_SOURCE common/*.cpp)
 

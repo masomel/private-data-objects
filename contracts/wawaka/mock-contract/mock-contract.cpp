@@ -115,6 +115,10 @@ bool get_value(const Message& msg, const Environment& env, Response& rsp)
     return rsp.value(v, false);
 }
 
+int main() {
+    return 0;
+}
+
 contract_method_reference_t contract_method_dispatch_table[] = {
     CONTRACT_METHOD(inc_value),
     CONTRACT_METHOD(get_value),

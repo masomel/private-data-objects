@@ -95,10 +95,10 @@ void WawakaInterpreter::parse_response_string(
     // address in the native code
     int32 response_app_beg, response_app_end;
 
-    /*pe::ThrowIf<pe::RuntimeError>(
+    pe::ThrowIf<pe::RuntimeError>(
         response_app == 0,
         report_interpreter_error("invalid result pointer", "no response"));
-    */
+
     pe::ThrowIf<pe::RuntimeError>(
         ! wasm_runtime_get_app_addr_range(wasm_module_inst, response_app, &response_app_beg, &response_app_end),
         report_interpreter_error("invalid result pointer", "out of range"));
