@@ -24,7 +24,7 @@ SET(PDO_TOP_DIR $ENV{PDO_SOURCE_ROOT})
 
 SET(WASM_MEM_CONFIG "$ENV{WASM_MEM_CONFIG}")
 
-SET(CONTRACT_EXPORTS "\"['_ww_dispatch', '_ww_initialize']\"")
+SET(CONTRACT_EXPORTS "\"['_ww_dispatch', '_ww_initialize', '___wasm_call_ctors']\"")
 
 # Set the memory configuration for emscripten
 # LINEAR_MEMORY: Maximum size for a WASM module's linear memory (module's internal stack + static globals + padding); needs to be multiple of 64KB
@@ -60,7 +60,7 @@ STRING(REPLACE ";" " " EMCC_LINK_OPTIONS "${EMCC_LINK_OPTIONS}")
 
 # the -O2 is actually required for the moment because it removes
 # uncalled functions that clutter the wasm file
-SET(CMAKE_CXX_FLAGS "-Os -fPIC -fno-exceptions ${EMCC_BUILD_OPTIONS}")
+SET(CMAKE_CXX_FLAGS "-O2 -fPIC -fno-exceptions --no-entry ${EMCC_BUILD_OPTIONS}")
 SET(CMAKE_EXECUTABLE_SUFFIX ".wasm")
 
 FILE(GLOB COMMON_SOURCE ${PDO_TOP_DIR}/contracts/wawaka/common/*.cpp)
