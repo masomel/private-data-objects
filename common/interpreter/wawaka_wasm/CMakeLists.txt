@@ -94,6 +94,10 @@ if (NOT DEFINED WAMR_BUILD_LIBC_WASI)
   set (WAMR_BUILD_LIBC_WASI 0)
 endif ()
 
+# Disable the platform abstraction layer APIs
+set (WAMR_BUILD_LIBC_WASI 0)
+set (WAMR_BUILD_THREAD_MGR 0)
+
 # Set the memory configuration for wawaka
 # Enable bulk memory
 # RUNTIME_MEM_POOL_SIZE: The WASM runtime's global memory pool size
