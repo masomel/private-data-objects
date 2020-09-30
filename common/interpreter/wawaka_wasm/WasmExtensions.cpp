@@ -135,6 +135,17 @@ extern "C" double strtod_wrapper(
     return num;
 }
 
+// FIXME? Needed to tear down global objects
+extern "C" int
+__cxa_atexit_wrapper(
+    wasm_exec_env_t exec_env,
+    uint32 arg0,
+    uint32 arg1,
+    uint32 arg2)
+{
+    return 0;
+}
+
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 #ifdef __cplusplus
@@ -189,6 +200,8 @@ static NativeSymbol native_symbols[] =
     EXPORT_WASM_API_WITH_SIG2(simple_hash, "(*~)i"),
     EXPORT_WASM_API_WITH_SIG2(memchr, "(iii)i"),
     EXPORT_WASM_API_WITH_SIG2(strtod, "($*)F"),
+
+    EXPORT_WASM_API_WITH_SIG2(__cxa_atexit, "(iii)i"),
 };
 
 #ifdef __cplusplus
